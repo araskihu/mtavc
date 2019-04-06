@@ -1,0 +1,30 @@
+<meta>
+	<info type="script" name="JStreamer 3" author="CodyJ(L)" description="JStreamer3 Advanced Loader" version="3.0" />
+	
+	<script type="client" src="ObjectHandlers/WindsHandler_C.lua" />
+	<script type="client" src="ObjectHandlers/NightHandler_C.lua" />
+	<script type="server" src="Settings/settings_S.lua" />
+	<script type="client" src="Settings/settings_C.lua" />
+	
+	<script type="shared" src="IDs_Sh.lua" />
+	
+	<script type="client" src="Streamer_C.luac" />
+	<script type="server" src="Streamer_S.luac" />
+	
+	<file src="Images/Loading.png" />
+	
+	<export function="JcreateObject" type="server"/>
+	<export function="JcreateObject" type="client"/>
+	
+	<export function="JsetElementModel" type="server"/>
+	<export function="JsetElementModel" type="client"/>
+	
+	<export function="JCreateObjectDefinition" type="client"/>
+	<export function="JRemoveObjectDefinition" type="client"/>
+	
+	<export function="unloadModel" type="server"/>
+	<export function="unloadModel" type="client"/>
+	
+	<export function="isElementBroken" type="server"/>
+	
+</meta>
