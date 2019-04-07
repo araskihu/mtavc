@@ -1,0 +1,10 @@
+<meta>
+	<script src="sourceC.lua" type="client"/>
+	<script src="sourceS.lua" type="server"/>
+
+	<export function="showBox" type="client"/>
+	<export function="showBox" type="server"/>
+
+	<file src="fonts/fontawesome.otf"/>
+	<file src="fonts/Medium.otf"/>
+</meta>

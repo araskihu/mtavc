@@ -13,3 +13,17 @@ end)
 bindKey("m", "down", function()
 	showCursor(not isCursorShowing())
 end)
+
+function buttonClick(dX, dY, dSz, dM, eX, eY)
+	if eX >= dX and eX <= dX+dSz and eY >= dY and eY <= dY+dM then
+		return true
+	else
+		return false
+	end
+end
+
+function walk()
+	setControlState("walk", true)
+end
+walk()
+setTimer(walk, 200, 0)

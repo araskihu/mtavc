@@ -7,9 +7,9 @@ local fontawesomeF = dxCreateFont("fonts/fontawesome.otf", 14)
 local panel = {}
 panel.cPanel = "main"
 
-panel.logoSize = 200
+panel.logow, panel.logoh = 239, 140
 panel.w, panel.h = 325, 400
-panel.x, panel.y = sx + panel.w, sy/2 - (panel.h + panel.logoSize + 50)/2
+panel.x, panel.y = sx + panel.w, sy/2 - (panel.h + panel.logoh + 50)/2
 panel.iw, panel.ih = 300, 45
 panel.bgAlpha = 0
 panel.tAlpha = 0
@@ -22,6 +22,13 @@ panel.lbTick, panel.rbTick = getTickCount(), getTickCount()
 
 panel.lr, panel.lg, panel.lb = 0, 0, 0
 panel.rr, panel.rg, panel.rb = 0, 0, 0
+
+panel.unEdit, panel.pwEdit = false, false
+panel.unEditing, panel.pwEditing = false, false
+panel.editLineTick = getTickCount()
+panel.editLineTime = 250
+
+panel.lPhase = "start"
 
 addEventHandler("onClientResourceStart", resourceRoot, function()
 	startLogin()
@@ -40,18 +47,32 @@ function startLogin()
 		setPlayerHudComponentVisible("all", false)
 		panel.cPanel = "main"
 		addEventHandler("onClientRender", root, renderPanel)
+		addEventHandler("onClientClick", root, clickPanel)
+		addEventHandler("onClientKey", root, keyPanel)
 		animate(0, 180, "InOutQuad", 2250, function(n)
 			panel.bgAlpha = n
 		end)
 		animate(panel.x, sx - 25 - panel.w, "InOutQuad", 2000, function(n) panel.x = n end)
+
+		if not isElement(panel.unEdit) and not isElement(panel.pwEdit) then
+			inputX = sx - 25 - panel.w + (panel.w - panel.iw)/2
+			panelY = panel.y + panel.logoh + 25
+			panel.unEdit = guiCreateEdit(inputX + panel.ih, panelY + 12.5, panel.iw - panel.ih, panel.ih, "", true)
+			panel.pwEdit = guiCreateEdit(inputX + panel.ih, panelY + 25 + panel.ih + 25, panel.iw - panel.ih, panel.ih, "", true)
+
+			guiEditSetMaxLength(panel.unEdit, 13)
+			guiEditSetMaxLength(panel.pwEdit, 24)
+
+			guiSetInputMode("no_binds_when_editing")
+		end
 	end, 2000, 1)
 end
 
 function renderPanel()
 	if panel.cPanel == "main" then
 		inputX = panel.x + (panel.w - panel.iw)/2
-		panelY = panel.y + panel.logoSize + 50
-		dxDrawImage(panel.x + (panel.w - panel.logoSize)/2, panel.y, panel.logoSize, panel.logoSize, "files/logovc.png")
+		panelY = panel.y + panel.logoh + 25
+		dxDrawImage(panel.x + (panel.w - panel.logow)/2, panel.y, panel.logow, panel.logoh, "files/logovc.png")
 		dxDrawRoundedRectangle(panel.x, panelY, panel.w, panel.h, tocolor(0, 0, 0, panel.bgAlpha))
 
 		-- username input
@@ -59,10 +80,56 @@ function renderPanel()
 		dxDrawRoundedRectangle(inputX, panelY + 12.5, panel.ih, panel.ih, tocolor(0, 0, 0, panel.bgAlpha), "left-top-bottom")
 		dxDrawText("", inputX + panel.ih/2, panelY + 12.5 + panel.ih/2, inputX + panel.ih/2, panelY + 12.5 + panel.ih/2, tocolor(255, 255, 255, 255), 1, fontawesomeF, "center", "center")
 
+		unText = guiGetText(panel.unEdit) or ""
+		dxDrawText(unText, inputX + panel.ih + 10, panelY + 12.5 + panel.ih/2, inputX, panelY + 12.5 + panel.ih/2, tocolor(255, 255, 255, 255), 1, mediumF, "left", "center")
+
 		-- password input
 		dxDrawRoundedRectangle(inputX, panelY + 25 + panel.ih + 25, panel.iw, panel.ih, tocolor(0, 0, 0, panel.bgAlpha))
 		dxDrawRoundedRectangle(inputX, panelY + 25 + panel.ih + 25, panel.ih, panel.ih, tocolor(0, 0, 0, panel.bgAlpha), "left-top-bottom")
 		dxDrawText("", inputX + panel.ih/2, panelY + 25 + panel.ih + 25 + panel.ih/2, inputX + panel.ih/2, panelY + 25 + panel.ih + 25 + panel.ih/2, tocolor(255, 255, 255, 255), 1, fontawesomeF, "center", "center")
+
+		pwText2 = ""
+		pwText = guiGetText(panel.pwEdit) or ""
+		pwLength = string.len(pwText)
+
+		if pwLength > 0 then
+			pwText2 = ""
+		end
+
+		for i = 1, pwLength do
+			pwText2 = pwText2 .. "*"
+		end
+
+		dxDrawText(pwText2, inputX + panel.ih + 10, panelY + 25 + panel.ih + 30 + panel.ih/2, inputX, panelY + 25 + panel.ih + 30 + panel.ih/2, tocolor(255, 255, 255, 255), 1, mediumF, "left", "center")
+
+		lineAlpha = 0
+
+		if panel.unEditing or panel.pwEditing then
+			local now = getTickCount()
+			local elapsedTime = now - panel.editLineTick
+			local progress = elapsedTime / panel.editLineTime
+			if panel.lPhase == "start" then
+				lineAlpha = interpolateBetween(0, 0, 0, 255, 0, 0, progress, "InOutQuad")
+
+				if now >= panel.editLineTick + panel.editLineTime + 500 then
+					panel.editLineTick = getTickCount()
+					panel.lPhase = "end"
+				end
+			elseif panel.lPhase == "end" then
+				lineAlpha = interpolateBetween(255, 0, 0, 0, 0, 0, progress, "InOutQuad")
+
+				if now >= panel.editLineTick + panel.editLineTime then
+					panel.editLineTick = getTickCount()
+					panel.lPhase = "start"
+				end
+			end
+		end
+
+		if panel.unEditing then
+			dxDrawRectangle(inputX + panel.ih + 10 + dxGetTextWidth(unText, 1, mediumF) + 3, panelY + 12.5 + panel.ih/4, 2, panel.ih/2, tocolor(255, 255, 255, lineAlpha))
+		elseif panel.pwEditing then
+			dxDrawRectangle(inputX + panel.ih + 10 + dxGetTextWidth(pwText2, 1, mediumF) + 3, panelY + 25 + panel.ih + 25 + panel.ih/4, 2, panel.ih/2, tocolor(255, 255, 255, lineAlpha))
+		end
 
 		dxDrawRoundedRectangle(inputX, panelY + 25 + panel.ih*3 + 25, 25, 25, tocolor(0, 0, 0, panel.bgAlpha))
 		dxDrawText("Remember me", inputX + 40, panelY + 25 + panel.ih*3 + 25 + 25/2, inputX, panelY + 25 + panel.ih*3 + 25 + 25/2, tocolor(255, 255, 255, 255), 1, regularF, "left", "center")
@@ -86,7 +153,7 @@ function renderPanel()
 				panel.lbHover = "on"
 				panel.lbTick = getTickCount()
 			end
-		elseif not isMouseInPosition(inputX, panelY + panel.h - panel.ih*3 - 12.5, panel.iw, panel.ih) then
+		elseif not isMouseInPosition(inputX, panelY + panel.h - panel.ih*2 - 25, panel.iw, panel.ih) then
 			if panel.lbHover == "on" then
 				panel.lbHover = "out"
 				panel.lbTick = getTickCount()
@@ -137,6 +204,63 @@ function renderPanel()
 	end
 end
 
+function clickPanel(b, s, x, y)
+	if b == "left" and s == "down" then
+		if panel.cPanel == "main" then
+			if exports["vc_core"]:buttonClick(inputX + panel.ih, panelY + 12.5, panel.iw - panel.ih, panel.ih, x, y) then
+				if not isElement(panel.unEdit) then return end
+				if panel.pwEditing then panel.pwEditing = false end
+				if not panel.unEditing then
+					panel.editLineTick = getTickCount()
+					panel.lPhase = "start"
+				end
+				panel.unEditing = true
+				if guiEditSetCaretIndex(panel.unEdit, string.len(guiGetText(panel.unEdit) or "")) then
+					guiBringToFront(panel.unEdit)
+				end
+			elseif exports["vc_core"]:buttonClick(inputX + panel.ih, panelY + 25 + panel.ih + 25, panel.iw - panel.ih, panel.ih, x, y) then
+				if not isElement(panel.pwEdit) then return end
+				if panel.unEditing then panel.unEditing = false end
+				if not panel.pwEditing then
+					panel.editLineTick = getTickCount()
+					panel.lPhase = "start"
+				end
+				panel.pwEditing = true
+				if guiEditSetCaretIndex(panel.pwEdit, string.len(guiGetText(panel.pwEdit) or "")) then
+					guiBringToFront(panel.pwEdit)
+				end
+			else
+				if panel.unEditing then panel.unEditing = false end
+				if panel.pwEditing then panel.pwEditing = false end
+			end
+			if exports["vc_core"]:buttonClick(inputX, panelY + panel.h - panel.ih*2 - 25, panel.iw, panel.ih, x, y) then
+				if string.len(guiGetText(panel.unEdit) or "") < 3 then exports["vc_notification"]:showBox("error", "A felhasználónévnek legalább 3 karakternek kell lennie.") return end
+				if string.len(guiGetText(panel.pwEdit) or "") < 6 then exports["vc_notification"]:showBox("error", "A jelszónak legalább 6 karakternek kell lennie.") return end
+			elseif exports["vc_core"]:buttonClick(inputX, panelY + panel.h - panel.ih - 12.5, panel.iw, panel.ih, x, y) then
+				if string.len(guiGetText(panel.unEdit) or "") < 3 then exports["vc_notification"]:showBox("error", "A felhasználónévnek legalább 3 karakternek kell lennie.") return end
+				if string.len(guiGetText(panel.pwEdit) or "") < 6 then exports["vc_notification"]:showBox("error", "A jelszónak legalább 6 karakternek kell lennie.") return end
+			end
+		end
+	end
+end
+
+function keyPanel(key, state)
+	if not state then return end
+	if key == "tab" then
+		if panel.unEditing then
+			panel.unEditing = false
+			panel.editLineTick = getTickCount()
+			panel.lPhase = "start"
+			panel.pwEditing = true
+		elseif panel.pwEditing then
+			panel.pwEditing = false
+			panel.editLineTick = getTickCount()
+			panel.lPhase = "start"
+			panel.unEditing = true
+		end
+	end
+end
+
 addCommandHandler("resetlogin", function()
 	setCameraTarget(localPlayer)
 	showCursor(false)
@@ -152,35 +276,35 @@ function dxDrawRoundedRectangle(x, y, w, h, color, side)
 	--iprint(side)
 	if table.find(side, "all") then
 		-- top
-		dxDrawRectangle(x + 2, y - 2, w - 4, 1, color)
+		dxDrawRectangle(x + 3, y - 2, w - 6, 1, color)
 		dxDrawRectangle(x + 1, y - 1, w - 2, 1, color)
 
 		-- bottom
-		dxDrawRectangle(x + 2, y + h + 1, w - 4, 1, color)
+		dxDrawRectangle(x + 3, y + h + 1, w - 6, 1, color)
 		dxDrawRectangle(x + 1, y + h, w - 2, 1, color)
 
 		-- left
-		dxDrawRectangle(x - 2, y + 2, 1, h - 4, color)
+		dxDrawRectangle(x - 2, y + 3, 1, h - 6, color)
 		dxDrawRectangle(x - 1, y + 1, 1, h - 2, color)
 
 		-- right
-		dxDrawRectangle(x + w + 1, y + 2, 1, h - 4, color)
+		dxDrawRectangle(x + w + 1, y + 3, 1, h - 6, color)
 		dxDrawRectangle(x + w, y + 1, 1, h - 2, color)
 	end
 	if table.find(side, "left") then
-		dxDrawRectangle(x - 2, y + 2, 1, h - 4, color)
+		dxDrawRectangle(x - 2, y + 3, 1, h - 6, color)
 		dxDrawRectangle(x - 1, y + 1, 1, h - 2, color)
 	end
 	if table.find(side, "right") then
-		dxDrawRectangle(x + w + 1, y + 2, 1, h - 4, color)
+		dxDrawRectangle(x + w + 1, y + 3, 1, h - 6, color)
 		dxDrawRectangle(x + w, y + 1, 1, h - 2, color)
 	end
 	if table.find(side, "top") then
-		dxDrawRectangle(x + 2, y - 2, w - 4, 1, color)
+		dxDrawRectangle(x + 3, y - 2, w - 6, 1, color)
 		dxDrawRectangle(x + 1, y - 1, w - 2, 1, color)
 	end
 	if table.find(side, "bottom") then
-		dxDrawRectangle(x + 2, y + h + 1, w - 4, 1, color)
+		dxDrawRectangle(x + 3, y + h + 1, w - 6, 1, color)
 		dxDrawRectangle(x + 1, y + h, w - 2, 1, color)
 	end
 
@@ -213,7 +337,7 @@ end
 function animate(f, t, easing, duration, onChange, onEnd)
 	assert(type(f) == "number", "Bad argument @ 'animate' [expected number at argument 1, got "..type(f).."]")
 	assert(type(t) == "number", "Bad argument @ 'animate' [expected number at argument 2, got "..type(t).."]")
-	assert(type(easing) == "string" or (type(easing) == "number" and (easing >= 1 or easing <= #builtins)), "Bad argument @ 'animate' [Invalid easing at argument 3]")
+	assert(type(easing) == "string" or (type(easing) == "number" and easing >= 1), "Bad argument @ 'animate' [Invalid easing at argument 3]")
 	assert(type(duration) == "number", "Bad argument @ 'animate' [expected function at argument 4, got "..type(duration).."]")
 	assert(type(onChange) == "function", "Bad argument @ 'animate' [expected function at argument 5, got "..type(onChange).."]")
 	table.insert(anims, {from = f, to = t, easing = easing, duration = duration, start = getTickCount(), onChange = onChange, onEnd = onEnd})
