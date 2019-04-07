@@ -7,13 +7,15 @@ local fontawesomeF = dxCreateFont("fonts/fontawesome.otf", 14)
 local panel = {}
 panel.cPanel = "main"
 
-panel.logoSize = 256
-panel.w, panel.h = 375, 500
+panel.logoSize = 200
+panel.w, panel.h = 325, 400
 panel.x, panel.y = sx + panel.w, sy/2 - (panel.h + panel.logoSize + 50)/2
 panel.iw, panel.ih = 300, 45
 panel.bgAlpha = 0
 panel.tAlpha = 0
 panel.iAlpha = 0
+
+panel.rememberChecked = true
 
 panel.lbHover, panel.rbHover = "out", "out"
 panel.lbTick, panel.rbTick = getTickCount(), getTickCount()
@@ -53,44 +55,50 @@ function renderPanel()
 		dxDrawRoundedRectangle(panel.x, panelY, panel.w, panel.h, tocolor(0, 0, 0, panel.bgAlpha))
 
 		-- username input
-		dxDrawRoundedRectangle(inputX, panelY + 45, panel.iw, panel.ih, tocolor(0, 0, 0, panel.bgAlpha))
-		dxDrawRoundedRectangle(inputX, panelY + 45, panel.ih, panel.ih, tocolor(0, 0, 0, panel.bgAlpha), "left-top-bottom")
-		dxDrawText("", inputX + panel.ih/2, panelY + 45 + panel.ih/2, inputX + panel.ih/2, panelY + 45 + panel.ih/2, tocolor(255, 255, 255, 255), 1, fontawesomeF, "center", "center")
+		dxDrawRoundedRectangle(inputX, panelY + 12.5, panel.iw, panel.ih, tocolor(0, 0, 0, panel.bgAlpha))
+		dxDrawRoundedRectangle(inputX, panelY + 12.5, panel.ih, panel.ih, tocolor(0, 0, 0, panel.bgAlpha), "left-top-bottom")
+		dxDrawText("", inputX + panel.ih/2, panelY + 12.5 + panel.ih/2, inputX + panel.ih/2, panelY + 12.5 + panel.ih/2, tocolor(255, 255, 255, 255), 1, fontawesomeF, "center", "center")
 
 		-- password input
-		dxDrawRoundedRectangle(inputX, panelY + 45 + panel.ih + 45, panel.iw, panel.ih, tocolor(0, 0, 0, panel.bgAlpha))
-		dxDrawRoundedRectangle(inputX, panelY + 45 + panel.ih + 45, panel.ih, panel.ih, tocolor(0, 0, 0, panel.bgAlpha), "left-top-bottom")
-		dxDrawText("", inputX + panel.ih/2, panelY + 45 + panel.ih + 45 + panel.ih/2, inputX + panel.ih/2, panelY + 45 + panel.ih + 45 + panel.ih/2, tocolor(255, 255, 255, 255), 1, fontawesomeF, "center", "center")
+		dxDrawRoundedRectangle(inputX, panelY + 25 + panel.ih + 25, panel.iw, panel.ih, tocolor(0, 0, 0, panel.bgAlpha))
+		dxDrawRoundedRectangle(inputX, panelY + 25 + panel.ih + 25, panel.ih, panel.ih, tocolor(0, 0, 0, panel.bgAlpha), "left-top-bottom")
+		dxDrawText("", inputX + panel.ih/2, panelY + 25 + panel.ih + 25 + panel.ih/2, inputX + panel.ih/2, panelY + 25 + panel.ih + 25 + panel.ih/2, tocolor(255, 255, 255, 255), 1, fontawesomeF, "center", "center")
 
-		dxDrawRoundedRectangle(inputX, panelY + 45 + panel.ih*3 + 45, 25, 25, tocolor(0, 0, 0, panel.bgAlpha))
-		dxDrawText("Remember me", inputX + 40, panelY + 45 + panel.ih*3 + 45 + 25/2, inputX, panelY + 45 + panel.ih*3 + 45 + 25/2, tocolor(255, 255, 255, 255), 1, regularF, "left", "center")
+		dxDrawRoundedRectangle(inputX, panelY + 25 + panel.ih*3 + 25, 25, 25, tocolor(0, 0, 0, panel.bgAlpha))
+		dxDrawText("Remember me", inputX + 40, panelY + 25 + panel.ih*3 + 25 + 25/2, inputX, panelY + 25 + panel.ih*3 + 25 + 25/2, tocolor(255, 255, 255, 255), 1, regularF, "left", "center")
 
-		dxDrawRoundedRectangle(inputX, panelY + panel.h - panel.ih*3 - 45, panel.iw, panel.ih, tocolor(panel.lr, panel.lg, panel.lb, panel.bgAlpha))
-		dxDrawText("Sign In", inputX + panel.iw/2, panelY + panel.h - panel.ih*3 - 45 + panel.ih/2, inputX + panel.iw/2, panelY + panel.h - panel.ih*3 - 45 + panel.ih/2, tocolor(255, 255, 255, 255), 1, mediumF, "center", "center")
+		if panel.rememberChecked then
+			dxDrawText("", inputX + 25/2, panelY + 25 + panel.ih*3 + 25 + 25/2, inputX + 25/2, panelY + 25 + panel.ih*3 + 25 + 25/2, tocolor(235, 138, 184, 255), 0.7, fontawesomeF, "center", "center")
+		end
 
-		dxDrawRoundedRectangle(inputX, panelY + panel.h - panel.ih - 45, panel.iw, panel.ih, tocolor(panel.rr, panel.rg, panel.rb, panel.bgAlpha))
-		dxDrawText("Sign Up", inputX + panel.iw/2, panelY + panel.h - panel.ih - 45 + panel.ih/2, inputX + panel.iw/2, panelY + panel.h - panel.ih - 45 + panel.ih/2, tocolor(255, 255, 255, 255), 1, mediumF, "center", "center")
+		dxDrawText("An awesome open-source project", inputX, panelY + panel.h/2 + 35, inputX, panelY, tocolor(255, 255, 255, 255), 1, regularF, "left", "top")
+
+		dxDrawRoundedRectangle(inputX, panelY + panel.h - panel.ih*2 - 25, panel.iw, panel.ih, tocolor(panel.lr, panel.lg, panel.lb, panel.bgAlpha))
+		dxDrawText("Sign In", inputX + panel.iw/2, panelY + panel.h - panel.ih*2 - 25 + panel.ih/2, inputX + panel.iw/2, panelY + panel.h - panel.ih*2 - 25 + panel.ih/2, tocolor(255, 255, 255, 255), 1, mediumF, "center", "center")
+
+		dxDrawRoundedRectangle(inputX, panelY + panel.h - panel.ih - 12.5, panel.iw, panel.ih, tocolor(panel.rr, panel.rg, panel.rb, panel.bgAlpha))
+		dxDrawText("Sign Up", inputX + panel.iw/2, panelY + panel.h - panel.ih - 12.5 + panel.ih/2, inputX + panel.iw/2, panelY + panel.h - panel.ih - 12.5 + panel.ih/2, tocolor(255, 255, 255, 255), 1, mediumF, "center", "center")
 
 		-- hover effects
 
-		if isMouseInPosition(inputX, panelY + panel.h - panel.ih*3 - 45, panel.iw, panel.ih) then
+		if isMouseInPosition(inputX, panelY + panel.h - panel.ih*2 - 25, panel.iw, panel.ih) then
 			if panel.lbHover == "out" then
 				panel.lbHover = "on"
 				panel.lbTick = getTickCount()
 			end
-		elseif not isMouseInPosition(inputX, panelY + panel.h - panel.ih*3 - 45, panel.iw, panel.ih) then
+		elseif not isMouseInPosition(inputX, panelY + panel.h - panel.ih*3 - 12.5, panel.iw, panel.ih) then
 			if panel.lbHover == "on" then
 				panel.lbHover = "out"
 				panel.lbTick = getTickCount()
 			end
 		end
 
-		if isMouseInPosition(inputX, panelY + panel.h - panel.ih - 45, panel.iw, panel.ih) then
+		if isMouseInPosition(inputX, panelY + panel.h - panel.ih - 12.5, panel.iw, panel.ih) then
 			if panel.rbHover == "out" then
 				panel.rbHover = "on"
 				panel.rbTick = getTickCount()
 			end
-		elseif not isMouseInPosition(inputX, panelY + panel.h - panel.ih - 45, panel.iw, panel.ih) then
+		elseif not isMouseInPosition(inputX, panelY + panel.h - panel.ih - 12.5, panel.iw, panel.ih) then
 			if panel.rbHover == "on" then
 				panel.rbHover = "out"
 				panel.rbTick = getTickCount()
