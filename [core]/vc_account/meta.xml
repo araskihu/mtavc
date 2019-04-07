@@ -2,4 +2,10 @@
 	<script src="sourceC.lua" type="client"/>
 	<script src="sourceS.lua" type="server"/>
 	<script src="sourceG.lua" type="shared"/>
+
+	<file src="files/logovc.png"/>
+
+	<file src="fonts/Medium.otf"/>
+	<file src="fonts/Regular.otf"/>
+	<file src="fonts/fontawesome.otf"/>
 </meta>

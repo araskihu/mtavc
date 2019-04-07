@@ -5,7 +5,9 @@ end)
 
 addCommandHandler("getpos", function()
 	local x, y, z = getElementPosition(localPlayer)
+	local rx, ry, rz = getElementRotation(localPlayer)
 	outputChatBox(x .. ", " .. y .. ", " .. z)
+	outputChatBox("Rotáció: " .. rz)
 end)
 
 bindKey("m", "down", function()
